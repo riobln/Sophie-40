@@ -237,6 +237,40 @@
     to   { opacity: 0.85; transform: translateY(0); }
   }
 
+  /* Deadline Badge im Hero */
+  .deadline-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 32px;
+    padding: 14px 22px;
+    background: var(--yellow);
+    border: 2px solid var(--ink);
+    border-radius: 100px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transform: rotate(2deg);
+    box-shadow: 4px 4px 0 var(--ink);
+    opacity: 0;
+    animation: fadeUp 0.8s ease-out 1.2s forwards;
+  }
+  .deadline-badge .pulse-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: var(--red);
+    animation: pulse 2s ease-in-out infinite;
+  }
+  .deadline-badge strong {
+    font-weight: 600;
+    letter-spacing: 0.05em;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.4); opacity: 0.6; }
+  }
+
   /* Scroll-Indikator unten */
   .scroll-hint {
     margin-top: 48px;
@@ -245,7 +279,7 @@
     letter-spacing: 0.2em;
     text-transform: uppercase;
     opacity: 0;
-    animation: fadeUp 0.8s ease-out 1.4s forwards;
+    animation: fadeUp 0.8s ease-out 1.6s forwards;
   }
   .scroll-hint::after {
     content: ' ↓';
@@ -445,6 +479,37 @@
       margin-top: 0;
     }
     .gallery-item { aspect-ratio: 4 / 3; }
+  }
+
+  /* ========== Plus-One Essens-Block ========== */
+  .plus-one-diet {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease, margin-top 0.3s ease;
+    margin-top: 0;
+  }
+  .plus-one-diet.show {
+    max-height: 500px;
+    opacity: 1;
+    margin-top: 24px;
+  }
+  .plus-one-diet-inner {
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.6);
+    border: 2px dashed var(--ink);
+    border-radius: 16px;
+  }
+  .plus-one-diet .question-label {
+    margin-bottom: 12px;
+  }
+  .plus-one-name-display {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-weight: 600;
+    color: var(--pink);
+    text-transform: none;
+    letter-spacing: 0;
   }
 
   /* ========== Formular ========== */
@@ -742,6 +807,10 @@
         40. Geburtstag mit mir zusammen zu feiern. Es soll rund und bunt werden — und
         am besten mit euch allen zusammen!
       </p>
+      <div class="deadline-badge">
+        <span class="pulse-dot"></span>
+        <span>Bitte antworten bis <strong>31. Mai 2026</strong></span>
+      </div>
       <div class="scroll-hint">Scroll für die Details</div>
     </div>
   </header>
@@ -845,6 +914,31 @@
           <span class="question-label">Unverträglichkeiten / Allergien</span>
           <textarea name="allergies" placeholder="z.B. Nüsse, Laktose, Gluten ... oder leer lassen"></textarea>
         </div>
+
+        <!-- +1 Essenspräferenz, erscheint nur wenn ein +1-Name eingegeben wurde -->
+        <div class="plus-one-diet" id="plusOneDiet">
+          <div class="plus-one-diet-inner">
+            <span class="question-label">→ Und für <span class="plus-one-name-display" id="plusOneNameDisplay">deine Begleitung</span>?</span>
+            <div class="options">
+              <label class="option">
+                <input type="radio" name="plus1_diet" value="vegan">
+                <span class="option-text">Isst vegan 🌱</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="plus1_diet" value="vegetarisch">
+                <span class="option-text">Isst vegetarisch 🥗</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="plus1_diet" value="fleisch">
+                <span class="option-text">Isst Fleisch 🍖</span>
+              </label>
+            </div>
+            <div style="margin-top: 14px;">
+              <span class="question-label">Unverträglichkeiten / Allergien der Begleitung</span>
+              <textarea name="plus1_allergies" placeholder="z.B. Nüsse, Laktose, Gluten ... oder leer lassen"></textarea>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -934,7 +1028,7 @@
     <!-- ============ SUBMIT ============ -->
     <div class="submit-section">
       <button type="submit">RSVP abschicken →</button>
-      <div class="submit-hint">— ich freu mich auf dich —</div>
+      <div class="submit-hint">— bitte bis 31. Mai antworten · ich freu mich auf dich —</div>
     </div>
   </form>
 
@@ -971,6 +1065,28 @@
   }
 
   // Form-Submit
+  // +1 Essenspräferenz nur anzeigen, wenn ein +1-Name eingetragen wurde
+  const plus1Input = document.querySelector('input[name="sa_plus1"]');
+  const plus1DietBlock = document.getElementById('plusOneDiet');
+  const plus1NameDisplay = document.getElementById('plusOneNameDisplay');
+
+  function updatePlus1Block() {
+    const name = plus1Input.value.trim();
+    if (name.length > 0) {
+      plus1NameDisplay.textContent = name;
+      plus1DietBlock.classList.add('show');
+    } else {
+      plus1DietBlock.classList.remove('show');
+      // Auswahl zurücksetzen, falls Name wieder gelöscht wird
+      plus1DietBlock.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+      plus1DietBlock.querySelectorAll('textarea').forEach(t => t.value = '');
+    }
+  }
+  if (plus1Input) {
+    plus1Input.addEventListener('input', updatePlus1Block);
+    plus1Input.addEventListener('blur', updatePlus1Block);
+  }
+
   // Form-Submit an Formspree
   const form = document.getElementById('rsvpForm');
   const submitBtn = form.querySelector('button[type="submit"]');
