@@ -986,7 +986,7 @@
         <span class="question-label">→ Wie sieht's bei dir Sonntag aus?</span>
         <div class="options">
           <label class="option with-inputs">
-            <input type="checkbox" name="fu_join" value="yes">
+            <input type="radio" name="fu_join" value="yes">
             <span class="option-text"><strong>Ich komme mit zur Fusion 🚀</strong></span>
           </label>
           <div class="input-row">
@@ -994,14 +994,26 @@
           </div>
 
           <label class="option">
-            <input type="checkbox" name="fu_has_ticket" value="yes">
-            <span class="option-text">Ich habe schon ein Sonntagsticket 🎟️</span>
+            <input type="radio" name="fu_join" value="no">
+            <span class="option-text">Bin nicht dabei am Sonntag 🛌</span>
           </label>
+        </div>
 
-          <label class="option">
-            <input type="checkbox" name="fu_needs_ticket" value="yes">
-            <span class="option-text">Ich brauche noch ein Sonntagsticket 🎟️❓</span>
-          </label>
+        <!-- Folge-Frage: Ticket-Status, nur sichtbar wenn "Ich komme mit" gewählt -->
+        <div class="plus-one-diet" id="fusionTicketBlock">
+          <div class="plus-one-diet-inner">
+            <span class="question-label">→ Wie sieht's mit deinem Ticket aus?</span>
+            <div class="options">
+              <label class="option">
+                <input type="radio" name="fu_ticket" value="have">
+                <span class="option-text">Ich habe schon ein Sonntagsticket 🎟️</span>
+              </label>
+              <label class="option">
+                <input type="radio" name="fu_ticket" value="need">
+                <span class="option-text">Ich brauche noch ein Sonntagsticket 🎟️❓</span>
+              </label>
+            </div>
+          </div>
         </div>
       </div>
     </section>
@@ -1086,6 +1098,22 @@
     plus1Input.addEventListener('input', updatePlus1Block);
     plus1Input.addEventListener('blur', updatePlus1Block);
   }
+
+  // Fusion: Ticket-Frage nur anzeigen, wenn "Ich komme mit" gewählt
+  const fusionRadios = document.querySelectorAll('input[name="fu_join"]');
+  const fusionTicketBlock = document.getElementById('fusionTicketBlock');
+
+  function updateFusionTicketBlock() {
+    const checked = document.querySelector('input[name="fu_join"]:checked');
+    if (checked && checked.value === 'yes') {
+      fusionTicketBlock.classList.add('show');
+    } else {
+      fusionTicketBlock.classList.remove('show');
+      // Auswahl zurücksetzen, wenn "nein" gewählt wird
+      fusionTicketBlock.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+    }
+  }
+  fusionRadios.forEach(r => r.addEventListener('change', updateFusionTicketBlock));
 
   // Form-Submit an Formspree
   const form = document.getElementById('rsvpForm');
